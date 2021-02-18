@@ -1,0 +1,332 @@
+---
+title: "Assignment 1 - Week 2"
+author: "Kristian Severin, Lasse Hansen, Nikolaj Munch & Sarah Nielsen"
+date: "15/02/2021"
+output: html_document
+---
+
+
+```{r}
+library(pacman)
+pacman::p_load(rethinking, tidyverse)
+```
+
+
+```{r}
+# define grid
+dens <- 20
+p_grid <- seq(from = 0, to = 1, length.out = dens)
+
+# define prior
+prior_old_r <- dnorm(p_grid, 0.8, 0.2) # normally distributed prior
+
+
+# compute likelihood at each value in grid
+likelihood_old_r <- dbinom(3, size = 6, prob = p_grid)
+
+# compute product of likelihood and prior
+unstd.posterior_old_r <- likelihood_old_r * prior_old_r
+
+# standardize the posterior, so it sums to 1
+posterior_old_r <- unstd.posterior_old_r / sum(unstd.posterior_old_r)
+
+#Plot
+riccardo_old <- data.frame(grid = p_grid, posterior = posterior_old_r, prior = prior_old_r, likelihood = likelihood_old_r)
+
+r_old_plot <- ggplot(riccardo_old, aes(grid,posterior)) + 
+  geom_point() + 
+  geom_line() + 
+  theme_classic() + 
+  geom_line(aes(grid, prior/dens), color= 'red') + 
+  xlab("Knowledge of CogSci") + 
+  ylab("posterior probability") +
+  ggtitle("Riccardo (last year)")
+
+r_old_plot
+```
+
+#### Updated model - Ricardo
+
+```{r}
+#New model
+
+prior_new_r <- posterior_old_r
+likelihood_new_r <- dbinom(9, size = 10, prob = p_grid)
+
+# compute product of likelihood and prior
+unstd.posterior_new_r <- likelihood_new_r * prior_new_r
+
+# standardize the posterior, so it sums to 1
+posterior_new_r <- unstd.posterior_new_r / sum(unstd.posterior_new_r)
+
+#Plot
+riccardo_new <- data.frame(grid = p_grid, posterior = posterior_new_r, prior = prior_new_r, likelihood = likelihood_new_r)
+
+r_new_plot <- ggplot(riccardo_new, aes(grid,posterior)) + 
+  geom_point() + 
+  geom_line() + 
+  theme_classic() + 
+  geom_line(aes(grid, prior/dens), color= 'red') + 
+  xlab("Knowledge of CogSci") + 
+  ylab("posterior probability") +
+  ggtitle("Riccardo (New data, old as prior)")
+
+r_new_plot
+```
+
+#### Approach 2 - Relating new observations through prediciive posterior distribution - Ricardo
+
+```{r}
+#Approach 2 - Relating new observations through prediciive posterior distribution.
+
+#Sampling distributions
+set.seed(100)
+samples_r <- sample(p_grid, prob = posterior_old_r, replace = TRUE, size = 1e+4)
+hist(samples_r) #probability distribution sampled from posterior. 
+
+n_r <- 10 #Number of "trials" to simulate. In this case questions
+w_r <- rbinom(1e4, size=n, prob=samples_r) 
+simplehist(w_r) #Visualizing the distribution of number of correct answers for 6 questions, based on the probability from 
+#the sampled distribution
+
+mean(w_r==9) #0.093 - Meaning that there is a 9.3% probability of observing 9 correct answers out of 10, based on posterior predictive distribution of old data. 
+```
+
+
+## Kristian
+
+#### Calculating posterior from old data
+
+```{r}
+prior_old_k <- dnorm(p_grid, 0.8, 0.2) 
+
+
+likelihood_old_k <- dbinom(2, size = 2, prob = p_grid)
+
+
+unstd.posterior_old_k <- likelihood_old_k * prior_old_k
+
+
+posterior_old_k <- unstd.posterior_old_k / sum(unstd.posterior_old_k)
+
+#Plot
+Kristian_old <- data.frame(grid = p_grid, posterior = posterior_old_k, prior = prior_old_k, likelihood = likelihood_old_k)
+
+k_old_plot <- ggplot(Kristian_old, aes(grid,posterior)) + 
+  geom_point() + 
+  geom_line() + 
+  theme_classic() + 
+  geom_line(aes(grid, prior/dens), color= 'red') + 
+  xlab("Knowledge of CogSci") + 
+  ylab("posterior probability") +
+  ggtitle("Kristian (last year)")
+
+k_old_plot
+```
+
+#### New model - Kristian
+
+```{r}
+prior_new_k <- posterior_old_k
+likelihood_new_k <- dbinom(8, size = 12, prob = p_grid)
+
+# compute product of likelihood and prior
+unstd.posterior_new_k <- likelihood_new_k * prior_new_k
+
+# standardize the posterior, so it sums to 1
+posterior_new_k <- unstd.posterior_new_k / sum(unstd.posterior_new_k)
+
+#Plot
+Kristian_new <- data.frame(grid = p_grid, posterior = posterior_new_k, prior = prior_new_k, likelihood = likelihood_new_k)
+
+k_new_plot <- ggplot(Kristian_new, aes(grid,posterior)) + 
+  geom_point() + 
+  geom_line() + 
+  theme_classic() + 
+  geom_line(aes(grid, prior/dens), color= 'red') + 
+  xlab("Knowledge of CogSci") + 
+  ylab("posterior probability") +
+  ggtitle("Kristian (New data, old as prior)")
+k_new_plot
+```
+
+#### Approach 2 - Relating new observations through predictive posterior distribution - Tylen
+
+```{r}
+#Approach 2 - Relating new observations through predictive posterior distribution.
+
+#Sampling distributions
+set.seed(100)
+samples_k <- sample(p_grid, prob = posterior_old_k, replace = TRUE, size = 1e+4)
+hist(samples_k) #probability distribution sampled from posterior. 
+
+n_k = 12
+
+w_k <- rbinom(1e4, size=n_k, prob=samples_k) 
+simplehist(w_k) #Visualizing the distribution of number of correct answers for 6 questions, based on the probability from 
+#the sampled distribution
+
+mean(w_k==8) #0.1224 - Meaning that there is a 12,2% probability of observing 8 correct answers out of 12, based on posterior predictive distribution of old data. 
+
+```
+
+## Daina
+
+#### Calculating posterior from old data
+
+```{r}
+prior_old_d <- dnorm(p_grid, 0.8, 0.2) 
+
+
+likelihood_old_d <- dbinom(160, size = 198, prob = p_grid)
+
+
+unstd.posterior_old_d <- likelihood_old_d * prior_old_d
+
+
+posterior_old_d <- unstd.posterior_old_d / sum(unstd.posterior_old_d)
+
+#Plot
+Daina_old <- data.frame(grid = p_grid, posterior = posterior_old_d, prior = prior_old_d, likelihood = likelihood_old_d)
+
+d_old_plot <- ggplot(Daina_old, aes(grid,posterior)) + 
+  geom_point() + 
+  geom_line() + 
+  theme_classic() + 
+  geom_line(aes(grid, prior/dens), color= 'red') + 
+  xlab("Knowledge of CogSci") + 
+  ylab("posterior probability") +
+  ggtitle("Daina (last year)")
+
+d_old_plot
+```
+
+#### New model - Daina
+
+```{r}
+#New model
+
+prior_new_d <- posterior_old_d
+likelihood_new_d <- dbinom(148, size = 172, prob = p_grid)
+
+# compute product of likelihood and prior
+unstd.posterior_new_d <- likelihood_new_d * prior_new_d
+
+# standardize the posterior, so it sums to 1
+posterior_new_d <- unstd.posterior_new_d / sum(unstd.posterior_new_d)
+
+#Plot
+Daina_new <- data.frame(grid = p_grid, posterior = posterior_new_d, prior = prior_new_d, likelihood = likelihood_new_d)
+
+d_new_plot <- ggplot(Daina_new, aes(grid,posterior)) + 
+  geom_point() + 
+  geom_line() + 
+  theme_classic() + 
+  geom_line(aes(grid, prior/dens), color= 'red') + 
+  xlab("Knowledge of CogSci") + 
+  ylab("posterior probability") +
+  ggtitle("Daina (New data, old as prior)")
+
+d_new_plot
+```
+
+#### Approach 2 - Relating new observations through predictive posterior distribution. - Daina
+
+
+```{r}
+#Approach 2 - Relating new observations through predictive posterior distribution.
+
+#Sampling distributions
+set.seed(100)
+samples_d <- sample(p_grid, prob = posterior_old_d, replace = TRUE, size = 1e+4)
+hist(samples_d) #probability distribution sampled from posterior. 
+
+n_d = 172
+
+w_d <- rbinom(1e4, size=n_d, prob=samples_d) 
+simplehist(w_d) #Visualizing the distribution of number of correct answers for 6 questions, based on the probability from 
+#the sampled distribution
+
+mean(w_d==148) #0.0265 - Meaning that there is a 2,65% probability of observing 148 correct answers out of 172, based on posterior predictive distribution of old data. 
+
+```
+
+## Mikkel
+
+
+#### Calculating posterior from old data
+
+```{r}
+prior_old_m <- dnorm(p_grid, 0.8, 0.2) 
+
+
+likelihood_old_m <- dbinom(66, size = 132, prob = p_grid)
+
+
+unstd.posterior_old_m <- likelihood_old_m * prior_old_m
+
+
+posterior_old_m <- unstd.posterior_old_m / sum(unstd.posterior_old_m)
+
+#Plot
+Mikkel_old <- data.frame(grid = p_grid, posterior = posterior_old_m, prior = prior_old_m, likelihood = likelihood_old_m)
+
+m_old_plot <- ggplot(Mikkel_old, aes(grid,posterior)) + 
+  geom_point() + 
+  geom_line() + 
+  theme_classic() + 
+  geom_line(aes(grid, prior/dens), color= 'red') + 
+  xlab("Knowledge of CogSci") + 
+  ylab("posterior probability") +
+  ggtitle("Mikkel (last year)")
+
+m_old_plot
+```
+
+#### New model - Mikkel
+
+```{r}
+prior_new_m <- posterior_old_m
+likelihood_new_m <- dbinom(34, size = 65, prob = p_grid)
+
+# compute product of likelihood and prior
+unstd.posterior_new_m <- likelihood_new_m * prior_new_m
+
+# standardize the posterior, so it sums to 1
+posterior_new_m <- unstd.posterior_new_m / sum(unstd.posterior_new_m)
+
+#Plot
+Mikkel_new <- data.frame(grid = p_grid, posterior = posterior_new_m, prior = prior_new_m, likelihood = likelihood_new_m)
+
+m_new_plot <- ggplot(Mikkel_new, aes(grid,posterior)) + 
+  geom_point() + 
+  geom_line() + 
+  theme_classic() + 
+  geom_line(aes(grid, prior/dens), color= 'red') + 
+  xlab("Knowledge of CogSci") + 
+  ylab("posterior probability") +
+  ggtitle("Mikkel (New data, old as prior)")
+
+m_new_plot
+```
+
+#### Approach 2 - Relating new observations through predictive posterior distribution. - Mikkel
+
+```{r}
+#Approach 2 - Relating new observations through predictive posterior distribution.
+
+#Sampling distributions
+set.seed(100)
+samples_m <- sample(p_grid, prob = posterior_old_m, replace = TRUE, size = 1e+4)
+hist(samples_m) #probability distribution sampled from posterior. 
+
+n_m = 65
+
+w_m <- rbinom(1e4, size=n_m, prob=samples_m) 
+simplehist(w_m) #Visualizing the distribution of number of correct answers for 6 questions, based on the probability from 
+#the sampled distribution
+
+mean(w_m==34) #0.0813 - Meaning that there is an 8,03% probability of observing 34 correct answers out of 64, based on posterior predictive distribution of old data. 
+```
+
+
